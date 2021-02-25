@@ -1,0 +1,305 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+# @FileName  :app自动化测试模板.py
+# @Time      :2021/1/16 16:18
+# @Author    :HBB
+
+
+'''
+1,创建 common，data，testcase，三个python包，
+common，里用存放用于封装的代码，
+data，里用于存放yaml文件（测试用例）和读取yaml文件的代码，
+testcase，里用于存放执行用例的代码
+'''
+
+
+"""
+# 1,封装模板
+from appium import webdriver
+import allure
+import time
+import logging
+
+a={
+    'platformName':'Android',           # 手机操作系统
+    'platformVersion':'7.1.2',          # 操作系统版本
+    'deviceName':'127.0.0.1:62001',     # IP地址＋端口号
+    'appPackage':'',                    # app包名
+    'appActivity':'',                   # app的activity
+    'noReset':False                     # True表示热启动 False表示冷启动
+}
+
+
+class Helper():
+
+    def __init__(self):
+        self.driver=webdriver.Remote('http://127.0.0.1:4723/wd/hub',a)      # 连接appium服务器
+        self.driver.implicitly_wait(20)                                     # 设置隐形等待时间
+
+    def _find_ele(self,locate):
+        '''
+        封装定位
+        :param locate:
+        :return:
+        '''
+        ele=None
+        if locate.startswith('id'):
+            ele=self.driver.find_element_by_id(locate[locate.find("=")+1:])
+        elif locate.startswith('class'):
+            ele = self.driver.find_element_by_class_name(locate[locate.find("=") + 1:])
+        elif locate.startswith('xpath'):
+            ele = self.driver.find_element_by_xpath(locate[locate.find("=") + 1:])
+        if ele is not None:
+            return ele
+
+    def click(self,locate):
+        '''
+        点击
+        :param locate:
+        :return:
+        '''
+        self._find_ele(locate).click()
+
+    def input(self,locate,values):
+        '''
+        输入
+        :param locate:
+        :return:
+        '''
+        self._find_ele(locate).send_keys(values)
+
+    def quit(self):
+        '''
+        退出app
+        :return:
+        '''
+        self.driver.quit()
+
+    def clear(self,locate):
+        '''
+        清空
+        :return:
+        '''
+        self._find_ele(locate).clear()
+
+    def sleep(self,t=1):
+        '''
+        固定时间
+        :param t:
+        :return:
+        '''
+        time.sleep(int(t))
+
+    def save_screencap(self, img):
+        '''
+        截图并保存
+        :param img:
+        :return:
+        '''
+        now = time.strftime('%Y%m%d%H%M%S')                         # 获取当前时间
+        picture_name = f'../data/img/{now}_{img}.png'               # 给图片命名
+        self.driver.save_screenshot(picture_name)
+        with open(picture_name, 'rb')as f:
+            data = f.read()
+        allure.attach(data, img, allure.attachment_type.PNG)
+        # print('页面截图文件保存在:{}'.format(picture_name))
+        logging.info('页面截图文件保存在：{}'.format(picture_name))
+"""
+
+
+
+"""
+# 2,用例模板
+loginPage:
+  -
+    title: 大标题
+    description: 小标题
+    cases:
+      -
+        name: 步骤名称
+        method: click          #点击
+        locate: id=…… 或 class=…… 或 xpath=……           #定位
+      -
+        name: 步骤名称
+        method: input         # 输入
+        locate: 
+        values:               # 要输入的内容
+"""
+
+
+"""
+# 3,读取用例
+
+import yaml
+
+with open('../data/aaa.yaml','r',encoding='utf-8')as f:
+    datas=yaml.safe_load(f)
+"""
+
+
+"""
+# 4，调用封装代码和读取用例代码，
+包名必须以test_ 开头 或 test.py 结尾，
+类名和函数名以test开头
+
+from common.android_helper import Helper            # 导入封装函数
+from data.params import datas                       # 导入读取的yaml数据
+import pytest
+import os
+import allure
+import time
+
+@allure.feature('大标题')
+class Test_A():
+
+    def setup_class(self):                                      # 用例执行之前所执行的
+        '''
+        启动app
+        :return:
+        '''
+        self.helper=Helper()
+        
+    def teardown_class(self):                                   # 用例执行之后所执行的
+        '''
+        退出app
+        :return:
+        '''
+        self.helper.quit()
+    @allure.story('小标题')
+    @pytest.mark.parametrize('params',datas['loginPage'])
+    def testlogin(self,params):
+        testcase=params['cases']
+        allure.dynamic.title(params['title'])
+        allure.dynamic.description(params['description'])
+        for case in testcase:
+            with allure.step(case['name']):
+                func=getattr(self.helper,case['method'])
+                a=list(case.values())[2:]
+                func(*a)
+                self.helper.sleep()
+                self.helper.save_screencap(case['name'])
+
+if __name__=='__main__':
+    pytest.main(['-s','当前包名','--alluredir','../temp'])
+    os.system('allure generate ../temp -o ../report --clean')
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
